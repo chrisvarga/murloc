@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="murloc",
-    version="0.0.1",
+    version="0.0.2",
     author="Chris Varga",
     author_email="",
     description="extensible api server",
@@ -15,6 +15,7 @@ setup(
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     keywords="extensible api server",

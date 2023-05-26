@@ -12,11 +12,15 @@ import subprocess
 
 
 class Server:
-
     def __init__(
-            self, version="1.0.0", host="127.0.0.1", port=8048, name="murloc",
-            mode="default", url="https://github.com/"
-        ):
+        self,
+        version="1.0.0",
+        host="127.0.0.1",
+        port=8048,
+        name="murloc",
+        mode="default",
+        url="https://github.com/",
+    ):
         self.version = version
         self.host = host
         self.port = port
@@ -24,7 +28,8 @@ class Server:
         self.mode = mode
         self.url = url
         self.pid = os.getpid()
-        self.boot = inspect.cleandoc("""\n
+        self.boot = inspect.cleandoc(
+            """\n
                     
                  ___
                 /\  \ 
@@ -38,15 +43,15 @@ class Server:
                \::/  /             %s
                 \/__/ 
                     """
-                    % (
-                        self.name,
-                        self.version,
-                        self.mode,
-                        self.port,
-                        self.pid,
-                        self.url,
-                        ))
-
+            % (
+                self.name,
+                self.version,
+                self.mode,
+                self.port,
+                self.pid,
+                self.url,
+            )
+        )
 
     def log(self, s, stdout=True):
         date = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -61,14 +66,12 @@ class Server:
             except:
                 print(msg)
 
-
     def is_ipv6(self, n):
         try:
             socket.inet_pton(socket.AF_INET6, n)
             return True
         except socket.error:
             return False
-
 
     def handle(self, route, args):
         method = getattr(self, route, None)
@@ -77,12 +80,10 @@ class Server:
         # return method(self.path.parent_op)
         return method(self, args)
 
-
     def parse(self, req):
         args = req.split(" ")
         route = args.pop(0)
         return self.handle(route, args)
-
 
     def recvall(self, conn):
         data = b""
@@ -92,7 +93,6 @@ class Server:
             if len(packet) < 1024:
                 break
         return data
-
 
     def handle_connection(self, conn, addr):
         while True:
@@ -145,6 +145,7 @@ class Server:
 def set_value(self, args):
     print(self.name)
     return f"args={args}"
+
 
 s = Server()
 s.set = set_value

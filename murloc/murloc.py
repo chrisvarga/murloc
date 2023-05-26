@@ -10,6 +10,8 @@ import socket
 import inspect
 import subprocess
 
+def init(*args, **kwargs):
+    return Murloc(*args, **kwargs)
 
 class Murloc:
     def __init__(
@@ -59,8 +61,11 @@ class Murloc:
 
     def log(self, s):
         date = time.strftime("%Y-%m-%d %H:%M:%S")
-        n = inspect.currentframe().f_back.f_lineno
-        msg = f"[{date}] [{__file__}:{n}] [{os.getpid()}] {s}"
+        if self.mode == "debug":
+            n = inspect.currentframe().f_back.f_lineno
+            msg = f"[{date}] [{__file__}:{n}] [{os.getpid()}] {s}"
+        else:
+            msg = f"[{date}] [{os.getpid()}] {s}"
         if not self.logfile:
             print(msg)
         else:
@@ -135,7 +140,7 @@ class Murloc:
             except:
                 break
 
-
+"""
 # Define server methods here.
 def hello(self, args):
     # First parameter must be self.
@@ -152,3 +157,4 @@ methods = {
 if __name__ == "__main__":
     s = Murloc(methods=methods)
     s.listen()
+"""

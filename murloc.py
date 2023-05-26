@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
-#  A Python server model.
 
 import os
 import sys
 import time
 import json
+import struct
 import signal
 import socket
 import inspect
 import subprocess
 
 
-class Server:
+class Murloc:
     def __init__(
         self,
         version="1.0.0",
-        host="127.0.0.1",
+        host=socket.inet_ntoa(struct.pack("!L", socket.INADDR_LOOPBACK)),
         port=8048,
         name="murloc",
         mode="default",
-        url="https://github.com/",
+        url="https://github.com/chrisvarga/murloc",
+        methods=[],
     ):
         self.version = version
         self.host = host
@@ -27,6 +28,7 @@ class Server:
         self.name = name
         self.mode = mode
         self.url = url
+        self.methods = methods
         self.pid = os.getpid()
         self.boot = inspect.cleandoc(
             """\n
@@ -73,17 +75,15 @@ class Server:
         except socket.error:
             return False
 
-    def handle(self, route, args):
-        method = getattr(self, route, None)
-        if not callable(method) or method == None:
-            return f"(error) method '{route}' is not defined"
-        # return method(self.path.parent_op)
-        return method(self, args)
+    def handle(self, method, args):
+        if method not in self.methods:
+            return f"(error) method '{method}' is not defined"
+        return self.methods[method](self, args)
 
     def parse(self, req):
         args = req.split(" ")
-        route = args.pop(0)
-        return self.handle(route, args)
+        method = args.pop(0)
+        return self.handle(method, args)
 
     def recvall(self, conn):
         data = b""
@@ -141,12 +141,15 @@ class Server:
                 break
 
 
-# Main
-def set_value(self, args):
+# Define custom methods here. First parameter must be self.
+def myfunc(self, args):
     print(self.name)
     return f"args={args}"
 
 
-s = Server()
-s.set = set_value
+methods = {"myfunc": myfunc}
+
+
+# Main
+s = Murloc(methods=methods)
 s.listen()

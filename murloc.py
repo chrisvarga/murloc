@@ -21,6 +21,7 @@ class Murloc:
         mode="default",
         url="https://github.com/chrisvarga/murloc",
         methods=[],
+        logfile=None,
     ):
         self.version = version
         self.host = host
@@ -29,6 +30,7 @@ class Murloc:
         self.mode = mode
         self.url = url
         self.methods = methods
+        self.logfile = logfile
         self.pid = os.getpid()
         self.boot = inspect.cleandoc(
             """\n
@@ -55,25 +57,18 @@ class Murloc:
             )
         )
 
-    def log(self, s, stdout=True):
+    def log(self, s):
         date = time.strftime("%Y-%m-%d %H:%M:%S")
-        i = inspect.getframeinfo(inspect.stack()[1][0])
-        msg = f"[{date}] [{i.filename}:{i.lineno}] [{os.getpid()}] {s}"
-        if stdout:
+        n = inspect.currentframe().f_back.f_lineno
+        msg = f"[{date}] [{__file__}:{n}] [{os.getpid()}] {s}"
+        if not self.logfile:
             print(msg)
         else:
             try:
-                with open(f"/var/tmp/{self.name}.log", "a") as f:
-                    f.write(msg)
+                with open(self.logfile, "a") as f:
+                    f.write(f"{msg}\n")
             except:
                 print(msg)
-
-    def is_ipv6(self, n):
-        try:
-            socket.inet_pton(socket.AF_INET6, n)
-            return True
-        except socket.error:
-            return False
 
     def handle(self, method, args):
         if method not in self.methods:
@@ -141,15 +136,19 @@ class Murloc:
                 break
 
 
-# Define custom methods here. First parameter must be self.
-def myfunc(self, args):
-    print(self.name)
+# Define server methods here.
+def hello(self, args):
+    # First parameter must be self.
+    self.log(f"'{inspect.currentframe().f_code.co_name}' called")
     return f"args={args}"
 
 
-methods = {"myfunc": myfunc}
+methods = {
+    "hello": hello,
+}
 
 
 # Main
-s = Murloc(methods=methods)
-s.listen()
+if __name__ == "__main__":
+    s = Murloc(methods=methods)
+    s.listen()

@@ -3,12 +3,10 @@
 import os
 import sys
 import time
-import json
 import struct
 import signal
 import socket
 import inspect
-import subprocess
 
 def init(*args, **kwargs):
     return Murloc(*args, **kwargs)
@@ -139,22 +137,3 @@ class Murloc:
                     continue
             except:
                 break
-
-"""
-# Define server methods here.
-def hello(self, args):
-    # First parameter must be self.
-    self.log(f"'{inspect.currentframe().f_code.co_name}' called")
-    return f"args={args}"
-
-
-methods = {
-    "hello": hello,
-}
-
-
-# Main
-if __name__ == "__main__":
-    s = Murloc(methods=methods)
-    s.listen()
-"""

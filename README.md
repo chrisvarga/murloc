@@ -44,9 +44,7 @@ Murloc uses the following api conventions.
 ```javascript
 {
     "err": 0,
-    "data": {
-        // any valid json
-    }
+    "data": // any valid json
 }
 ```
 
@@ -54,9 +52,7 @@ Murloc uses the following api conventions.
 ```javascript
 {
     "err": 1,
-    "data": {
-        // any valid json
-    }
+    "data": // any valid json
 }
 ```
 

@@ -104,3 +104,16 @@ hero@azeroth:~$ echo '{"method":"dwarf"}' | nc -q 0 localhost 8048
 {"err":1,"data":"request lacks params"}
 hero@azeroth:~$
 ```
+
+## Customizing murloc
+The following default parameters can be changed by setting them in the murloc `init()` function.
+```python
+    version="1.0.0",
+    host="127.0.0.1",
+    port=8048,
+    name="murloc",
+    mode="default",
+    url="Aaaaaughibbrgubugbugrguburgle!",
+    methods=dict(),
+    logfile=None,
+```

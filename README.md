@@ -58,21 +58,22 @@ Murloc uses the following api conventions.
 
 ## Examples
 ```bash
-hero@azeroth:~$ cat test.py
+hero@azeroth:~$ cat hero.py
 import murloc
 
-def command_equip(self, params):
-    print(f"setting {params['variable']}={params['value']}")
+def new_character(self, params):
+    self.log(f"setting class to {params['class']}")
+    self.log(f"equiping weapons: {params['weapons']}")
     return '{"err":0,"data":null}'
 
 methods = {
-    "equip": command_equip,
+    "new": new_character,
 }
 m = murloc.init(methods=methods)
 
 m.listen()
-hero@azeroth:~$ python3 test.py
-[2023-05-27 20:04:37] [3064]
+hero@azeroth:~$ python3 hero.py
+[2023-05-27 20:35:19] [3139]
      ___
     /\  \
    /::\  \       murloc 1.0.0
@@ -80,18 +81,20 @@ hero@azeroth:~$ python3 test.py
  /:/  \:\  \
 /:/__/ \:\__\    Running in default mode
 \:\  \ /:/  /    Port: 8048
- \:\  /:/  /     PID:  3064
+ \:\  /:/  /     PID:  3139
   \:\/:/  /
    \::/  /             Aaaaaughibbrgubugbugrguburgle!
     \/__/
 
-[2023-05-27 20:04:37] [3064] Listening at 127.0.0.1:8048
-[2023-05-27 20:04:46] [3068] Connection from ('127.0.0.1', 60516)
-setting class=warrior
+[2023-05-27 20:35:19] [3139] Listening at 127.0.0.1:8048
+[2023-05-27 20:35:33] [3142] Connection from ('127.0.0.1', 43668)
+[2023-05-27 20:35:47] [3146] Connection from ('127.0.0.1', 45626)
+[2023-05-27 20:35:47] [3146] setting class to warrior
+[2023-05-27 20:35:47] [3146] equiping weapons: ['worn shortsword', 'worn buckler']
 ```
 
 ```bash
-hero@azeroth:~$ echo '{"method":"equip","params":{"variable":"class","value":"warrior"}}' | nc -q 0 localhost 8048
+hero@azeroth:~$ echo '{"method":"new","params":{"class":"warrior","weapons":["worn shortsword","worn buckler"]}}' | nc -q 0 localhost 8048
 {"err":0,"data":null}
 hero@azeroth:~$ echo '{"method":"dwarf","params":{"variable":"class","value":"warrior"}}' | nc -q 0 localhost 8048
 {"err":1,"data":"method not defined"}

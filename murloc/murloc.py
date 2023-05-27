@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import json
 import struct
 import signal
 import socket
@@ -75,15 +76,27 @@ class Murloc:
             except:
                 print(msg)
 
-    def handle(self, method, args):
+    def handle(self, method, params):
         if method not in self.methods:
-            return f"(error) method '{method}' is not defined"
-        return self.methods[method](self, args)
+            return '{"err":1,"data":"method not defined"}'
+        return self.methods[method](self, params)
 
     def parse(self, req):
-        args = req.split(" ")
-        method = args.pop(0)
-        return self.handle(method, args)
+        try:
+            js = json.loads(req)
+        except Exception as e:
+            if self.mode == "debug":
+                self.log(f"json.loads: {req}: {e}")
+            return '{"err":1,"data":"invalid json request"}'
+        try:
+            method = js["method"]
+        except:
+            return '{"err":1,"data":"request lacks method"}'
+        try:
+            params = js["params"]
+        except:
+            return '{"err":1,"data":"request lacks params"}'
+        return self.handle(method, params)
 
     def recvall(self, conn):
         data = b""

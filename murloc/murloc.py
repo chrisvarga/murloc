@@ -8,8 +8,10 @@ import signal
 import socket
 import inspect
 
+
 def init(*args, **kwargs):
     return Murloc(*args, **kwargs)
+
 
 class Murloc:
     def __init__(
@@ -19,8 +21,8 @@ class Murloc:
         port=8048,
         name="murloc",
         mode="default",
-        url="https://github.com/chrisvarga/murloc",
-        methods=[],
+        url="Aaaaaughibbrgubugbugrguburgle!",
+        methods=dict(),
         logfile=None,
     ):
         self.version = version
@@ -96,15 +98,17 @@ class Murloc:
         while True:
             try:
                 data = self.recvall(conn)
-            except:
+            except Exception as e:
+                if self.mode == "debug":
+                    self.log(f"recv: {e}")
                 conn.close()
                 break
             if not data:
                 conn.close()
                 break
-            req = data.decode("utf-8").strip()
-            res = self.parse(req) + "\n"
-            conn.sendall(res.encode("utf-8"))
+            req = data.decode().strip()
+            res = f"{self.parse(req)}\n"
+            conn.sendall(res.encode())
 
     def handle_sigint(self, sig, frame):
         print()
@@ -125,15 +129,17 @@ class Murloc:
         while True:
             try:
                 conn, addr = sock.accept()
-                conn.settimeout(10)
-                # Fork to handle the new connection; this allows us to use
-                # os.system() etc, which is problematic within a thread.
-                pid = os.fork()
-                if pid == 0:
-                    self.log(f"Connection from {addr}")
-                    self.handle_connection(conn, addr)
-                    sys.exit(0)
-                else:
-                    continue
-            except:
+            except Exception as e:
+                if self.mode == "debug":
+                    self.log(f"accept: {e}")
                 break
+            conn.settimeout(10)
+            # Fork to handle the new connection; this allows us to use
+            # os.system() etc, which is problematic within a thread.
+            pid = os.fork()
+            if pid == 0:
+                self.log(f"Connection from {addr}")
+                self.handle_connection(conn, addr)
+                sys.exit(0)
+            else:
+                continue

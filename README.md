@@ -6,10 +6,10 @@ Extensible api server
 import murloc
 
 # Define server methods here.
-# Must have (self, args) as params.
-def hello(self, args):
+# Must have (self, params) as params.
+def hello(self, params):
     self.log("hello, world!")
-    return f"args={args}"
+    return f"params={params}"
 
 
 # Include method routes in this dict like so.

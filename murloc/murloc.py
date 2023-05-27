@@ -106,9 +106,11 @@ class Murloc:
             except Exception as e:
                 if self.mode == "debug":
                     self.log(f"recv: {e}")
+                conn.shutdown(socket.SHUT_RDWR)
                 conn.close()
                 break
             if not data:
+                conn.shutdown(socket.SHUT_RDWR)
                 conn.close()
                 break
             req = data.decode().strip()

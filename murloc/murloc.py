@@ -36,28 +36,20 @@ class Murloc:
         self.logfile = logfile
         self.pid = os.getpid()
         self.boot = inspect.cleandoc(
-            """\n
+            f"""\n
                     
                  ___
                 /\  \ 
-               /::\  \       %s %s
+               /::\  \       {self.name} {self.version}
               /:/\:\  \ 
              /:/  \:\  \ 
-            /:/__/ \:\__\    Running in %s mode
-            \:\  \ /:/  /    Port: %-10s 
-             \:\  /:/  /     PID:  %-10s 
+            /:/__/ \:\__\    Running in {self.mode} mode
+            \:\  \ /:/  /    Port: {self.port:<4}
+             \:\  /:/  /     PID:  {self.pid:<4}
               \:\/:/  / 
-               \::/  /             %s
+               \::/  /             {self.url}
                 \/__/ 
                     """
-            % (
-                self.name,
-                self.version,
-                self.mode,
-                self.port,
-                self.pid,
-                self.url,
-            )
         )
 
     def log(self, s):

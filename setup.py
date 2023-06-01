@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="murloc",
-    version="0.0.4",
+    version="0.0.5",
     author="Chris Varga",
     author_email="",
     description="extensible api server",

@@ -16,12 +16,12 @@ def command_set(self, params):
     return '{"err":0,"data":"configuration successful"}'
 
 
-# Then add the methods to murloc using a `dict` like so.
-myroutes = {
+# Then add the methods to murloc by setting the methods `dict`.
+dispatch = {
     "hello": hello,
     "set": command_set,
 }
-m = murloc.init(methods=myroutes)
+m = murloc.init(methods=dispatch)
 
 # And start the server.
 m.listen()
@@ -56,6 +56,8 @@ Murloc uses the following api conventions.
 }
 ```
 
+Of course, you can have your own methods return anything you like.
+
 ## Examples
 ```bash
 hero@azeroth:~$ cat hero.py
@@ -87,27 +89,27 @@ hero@azeroth:~$ python3 hero.py
     \/__/
 
 [2023-05-27 20:35:19] [3139] Listening at 127.0.0.1:8048
-[2023-05-27 20:35:33] [3142] Connection from ('127.0.0.1', 43668)
-[2023-05-27 20:35:47] [3146] Connection from ('127.0.0.1', 45626)
 [2023-05-27 20:35:47] [3146] setting class to warrior
 [2023-05-27 20:35:47] [3146] equiping weapons: ['worn shortsword', 'worn buckler']
 ```
 
 ```bash
 hero@azeroth:~$ echo '{"method":"new","params":{"class":"warrior","weapons":["worn shortsword","worn buckler"]}}' | nc -q 0 localhost 8048
-{"err":0,"data":null}
+{"err": 0, "data": null}
 hero@azeroth:~$ echo '{"method":"dwarf","params":{"variable":"class","value":"warrior"}}' | nc -q 0 localhost 8048
-{"err":1,"data":"method not defined"}
+{"err": 1, "data": "method not defined"}
 hero@azeroth:~$ echo '{"params":{"variable":"class","value":"warrior"}}' | nc -q 0 localhost 8048
-{"err":1,"data":"request lacks method"}
+{"err": 1, "data": "request lacks method"}
 hero@azeroth:~$ echo '{"method":"dwarf"}' | nc -q 0 localhost 8048
-{"err":1,"data":"request lacks params"}
+# params are optional, but note that new_character() above will raise an exception since params will be None
+# e.g., TypeError: 'NoneType' object is not subscriptable
 hero@azeroth:~$
 ```
 
 ## Customizing murloc
 The following default parameters can be changed by setting them in the murloc `init()` function.
 ```python
+def init(
     version="1.0.0",
     host="127.0.0.1",
     port=8048,
@@ -116,4 +118,46 @@ The following default parameters can be changed by setting them in the murloc `i
     url="Aaaaaughibbrgubugbugrguburgle!",
     methods=dict(),
     logfile=None,
+    verbose=False,
+):
+```
+
+Here's an example.
+```python
+import murloc
+
+m = murloc.init(
+    version="2.1.0",
+    port=8080,
+    name="gandalf",
+    mode="grey",
+    url="https://example.com/gandalf",
+    verbose=True,
+)
+m.methods["fly"] = lambda self, params : "Fly, you fools!"
+m.listen()
+```
+
+```bash
+frodo@hobbiton:~$ python3 gandalf.py
+[2023-06-01 02:35:23] [murloc.py:148] [4129]
+     ___
+    /\  \
+   /::\  \       gandalf 2.1.0
+  /:/\:\  \
+ /:/  \:\  \
+/:/__/ \:\__\    Running in grey mode
+\:\  \ /:/  /    Port: 8080
+ \:\  /:/  /     PID:  4129
+  \:\/:/  /
+   \::/  /             https://example.com/gandalf
+    \/__/
+
+[2023-06-01 02:35:23] [murloc.py:155] [4129] Listening at 127.0.0.1:8080
+```
+
+```bash
+frodo@hobbiton:~$ echo '{"method":"fly"}' | nc -q 0 localhost 8080
+Fly, you fools!
+frodo@hobbiton:~$
 ```

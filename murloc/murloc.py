@@ -25,6 +25,7 @@ class Murloc:
         url="Aaaaaughibbrgubugbugrguburgle!",
         methods=dict(),
         logfile=None,
+        verbose=False,
     ):
         self.version = version
         self.host = host
@@ -34,6 +35,7 @@ class Murloc:
         self.url = url
         self.methods = methods
         self.logfile = logfile
+        self.verbose = verbose
         self.pid = os.getpid()
         self.boot = inspect.cleandoc(
             f"""\n
@@ -54,9 +56,9 @@ class Murloc:
 
     def log(self, s):
         date = time.strftime("%Y-%m-%d %H:%M:%S")
-        if self.mode == "debug":
+        if self.verbose:
             n = inspect.currentframe().f_back.f_lineno
-            msg = f"[{date}] [{__file__}:{n}] [{os.getpid()}] {s}"
+            msg = f"[{date}] [{os.path.basename(__file__)}:{n}] [{os.getpid()}] {s}"
         else:
             msg = f"[{date}] [{os.getpid()}] {s}"
         if not self.logfile:
@@ -68,26 +70,45 @@ class Murloc:
             except:
                 print(msg)
 
+    def debug(self, s):
+        if not self.verbose:
+            return
+        date = time.strftime("%Y-%m-%d %H:%M:%S")
+        n = inspect.currentframe().f_back.f_lineno
+        msg = f"[{date}] [{os.path.basename(__file__)}:{n}] [{os.getpid()}] {s}"
+        if not self.logfile:
+            print(msg)
+        else:
+            try:
+                with open(self.logfile, "a") as f:
+                    f.write(f"{msg}\n")
+            except:
+                print(msg)
+
     def handle(self, method, params):
+        err = {"err": 1, "data": "method not defined"}
         if method not in self.methods:
-            return '{"err":1,"data":"method not defined"}'
+            self.debug(f"method {method} not defined")
+            return json.dumps(err)
         return self.methods[method](self, params)
 
     def parse(self, req):
+        err = {"err": 1, "data": None}
         try:
             js = json.loads(req)
         except Exception as e:
-            if self.mode == "debug":
-                self.log(f"json.loads: {req}: {e}")
-            return '{"err":1,"data":"invalid json request"}'
+            self.debug(f"json.loads: {req}: {e}")
+            err["data"] = "invalid json request"
+            return json.dumps(err)
         try:
             method = js["method"]
         except:
-            return '{"err":1,"data":"request lacks method"}'
+            err["data"] = "request lacks method"
+            return json.dumps(err)
         try:
             params = js["params"]
         except:
-            return '{"err":1,"data":"request lacks params"}'
+            params = None
         return self.handle(method, params)
 
     def recvall(self, conn):
@@ -104,8 +125,7 @@ class Murloc:
             try:
                 data = self.recvall(conn)
             except Exception as e:
-                if self.mode == "debug":
-                    self.log(f"recv: {e}")
+                self.debug(f"recv: {e}")
                 conn.shutdown(socket.SHUT_RDWR)
                 conn.close()
                 break
@@ -137,15 +157,14 @@ class Murloc:
             try:
                 conn, addr = sock.accept()
             except Exception as e:
-                if self.mode == "debug":
-                    self.log(f"accept: {e}")
+                self.debug(f"accept: {e}")
                 break
             conn.settimeout(10)
             # Fork to handle the new connection; this allows us to use
             # os.system() etc, which is problematic within a thread.
             pid = os.fork()
             if pid == 0:
-                self.log(f"Connection from {addr}")
+                self.debug(f"Connection from {addr}")
                 self.handle_connection(conn, addr)
                 sys.exit(0)
             else:

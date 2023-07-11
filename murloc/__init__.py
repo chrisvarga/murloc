@@ -1,1 +1,1 @@
-from .murloc import init
+from .murloc import Murloc

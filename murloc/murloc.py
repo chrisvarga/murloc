@@ -10,10 +10,6 @@ import socket
 import inspect
 
 
-def init(*args, **kwargs):
-    return Murloc(*args, **kwargs)
-
-
 class Murloc:
     def __init__(
         self,
@@ -54,6 +50,16 @@ class Murloc:
                     """
         )
 
+    # def __call__(self, **params):
+    #    self.handle(**params)
+
+    def route(self, rule, **params):
+        def decorator(func):
+            self.methods[rule] = func
+            return func
+
+        return decorator
+
     def log(self, s):
         date = time.strftime("%Y-%m-%d %H:%M:%S")
         if self.verbose:
@@ -90,7 +96,14 @@ class Murloc:
         if method not in self.methods:
             self.debug(f"method {method} not defined")
             return json.dumps(err)
-        return self.methods[method](self, params)
+        if params:
+            return self.methods[method](params)
+        else:
+            try:
+                return self.methods[method]()
+            except:
+                err = {"err": 1, "data": "missing parameters"}
+                return json.dumps(err)
 
     def parse(self, req):
         err = {"err": 1, "data": None}
@@ -144,7 +157,7 @@ class Murloc:
     def handle_sigchild(self, sig, frame):
         os.waitpid(-1, os.WNOHANG)
 
-    def listen(self):
+    def serve(self):
         self.log(self.boot)
         signal.signal(signal.SIGINT, self.handle_sigint)
         signal.signal(signal.SIGCHLD, self.handle_sigchild)

@@ -24,10 +24,6 @@ import json
 
 
 class Murloc:
-    """
-    Murloc is an extensible api server. See help(murloc) for more info.
-    """
-
     def __init__(self, methods=dict()):
         self.methods = methods
 
@@ -44,53 +40,22 @@ class Murloc:
                 more_body = message.get("more_body", False)
             return body
 
-        async def parse(req):
+        async def handle_request(method, data):
             """
-            Parse a json request for `method` and `params` and call handle().
-            """
-            err = {"error": 1, "data": None}
-            try:
-                js = json.loads(req)
-            except Exception as e:
-                err["data"] = "Invalid json request"
-                return json.dumps(err)
-            try:
-                method = js["method"]
-            except:
-                err["data"] = "Request missing method"
-                return json.dumps(err)
-            try:
-                params = js["params"]
-            except:
-                params = None
-            return await handle(method, params)
-
-        async def handle(method, params):
-            """
-            Call method if defined. Handle optional and missing `params` cases.
+            Call method if defined. Handle optional data.
             """
             if method not in self.methods:
-                return json.dumps({"error": 1, "data": "Method not defined"})
-            # We could just raise an exception here if they passed params
-            # to a method not expecting them. Then they would just get an
-            # Internal Error response. But why not handle it gracefully?
-            # Similarly for if they don't pass params when they should.
-            if params:
-                try:
-                    return self.methods[method](params)
-                except:
-                    # If we fail even after giving a second chance, let it die.
-                    return self.methods[method]()
+                return "Method not defined"
+            if data:
+                # We assume data will be parsable as JSON.
+                return self.methods[method](json.loads(data))
             else:
-                try:
-                    return self.methods[method]()
-                except:
-                    return json.dumps({"error": 1, "data": "Method expected params"})
+                return self.methods[method]()
 
         # Main logic begins here.
         assert scope["type"] == "http"
         body = await read_body(receive)
-        res = await parse(body)
+        res = await handle_request(scope["path"], body.decode())
         await send(
             {
                 "type": "http.response.start",
@@ -110,7 +75,7 @@ class Murloc:
     def route(self, rule, **params):
         """
         This is a convenience decorator provided for easy route definitions.
-        See help(murloc) for more info.
+        See help(murloc) for more info on how to use.
         """
 
         def decorator(func):

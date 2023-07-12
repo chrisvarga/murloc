@@ -7,7 +7,7 @@ setup(
     author="Chris Varga",
     author_email="",
     description="Extensible API server",
-    long_description=help(murloc),
+    long_description=murloc.__doc__,
     long_description_content_type="text/markdown",
     url="",
     packages=find_packages(),

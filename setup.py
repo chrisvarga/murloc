@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="murloc",
-    version="1.0.0",
+    version="0.1.0",
     author="Chris Varga",
     author_email="",
     description="Extensible API server",
@@ -17,4 +17,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     keywords="extensible api server",
+    install_requires=["uvicorn", "hdb"],
 )

@@ -56,12 +56,16 @@ class Murloc:
         assert scope["type"] == "http"
         body = await read_body(receive)
         res = await handle_request(scope["path"], body.decode())
+        if type(res) is dict:
+            content_type = b"application/json"
+        else:
+            content_type = b"text/html"
         await send(
             {
                 "type": "http.response.start",
                 "status": 200,
                 "headers": [
-                    (b"content-type", b"application/json"),
+                    (b"content-type", content_type),
                 ],
             }
         )

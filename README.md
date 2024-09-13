@@ -39,10 +39,4 @@ Run the murloc server with uvicorn like so:
 $ uvicorn main:app
 ```
 
-Or, with gunicorn (must support ASGI) like so:
-
-```bash
-$ gunicorn main:app --worker-class uvicorn.workers.UvicornWorker
-```
-
 > Note: These examples assume main.py and the Murloc variable `app`.
